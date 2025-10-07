@@ -25,3 +25,11 @@ body {
     text-wrap: balance;
   }
 }
+
+.sidebar-bg {
+  background-color: rgb(250, 250, 250);
+}
+
+.sidebar-text {
+  color: rgb(123, 134, 146);
+}
