@@ -142,114 +142,131 @@ export default function UserTable({
       </form>
 
       {/* Table */}
-      <div className="mt-4 mx-4 md:mx-0">
-        <div className="overflow-x-auto border border-gray-200 rounded-xl shadow-sm">
-          <table className="md:min-w-full text-left text-sm">
-            <thead className="bg-gray-50">
-              <tr className="text-gray-600">
-                <th className="px-5 py-3 font-medium whitespace-nowrap">#</th>
-                <th className="px-5 py-3 font-medium whitespace-nowrap">User</th>
-                <th className="px-5 py-3 font-medium whitespace-nowrap">Email</th>
-                <th className="px-5 py-3 font-medium whitespace-nowrap">Current Role</th>
-                <th className="px-5 py-3 font-medium whitespace-nowrap">Change To</th>
-                <th className="px-5 py-3 font-medium text-right whitespace-nowrap">Action</th>
-              </tr>
-            </thead>
+<div className="mt-4 mx-4 md:mx-0">
+  {/* horizontal scroll container */}
+  <div className="overflow-x-auto border border-gray-200 rounded-xl shadow-sm">
+    <table className="min-w-[960px] w-full table-fixed text-left text-sm border-collapse">
+      <colgroup>
+        <col className="w-12" />             {/* # */}
+        <col className="w-[26%]" />          {/* User */}
+        <col className="w-[30%]" />          {/* Email */}
+        <col className="w-[14%]" />          {/* Current Role */}
+        <col className="w-[14%]" />          {/* Change To */}
+        <col className="w-[16%]" />          {/* Action */}
+      </colgroup>
 
-            <tbody className="divide-y divide-gray-100">
-              {loading ? (
-                <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-gray-500">Loading…</td>
-                </tr>
-              ) : users?.length ? (
-                users.map((u, i) => {
-                  const uid = u.id ?? u._id ?? i;
-                  const pending = edited[uid] ?? u.role; // pending selected role
-                  const changed = pending !== u.role;
-                  const index = (currentPage - 1) * pageSize + (i + 1);
-                  const rowBusy = actionLoading && actionRowId === uid;
+      <thead className="bg-gray-50">
+        <tr className="text-gray-600">
+          <th className="px-5 py-3 font-medium whitespace-nowrap">#</th>
+          <th className="px-5 py-3 font-medium whitespace-nowrap">User</th>
+          <th className="px-5 py-3 font-medium whitespace-nowrap">Email</th>
+          <th className="px-5 py-3 font-medium whitespace-nowrap">Current Role</th>
+          <th className="px-5 py-3 font-medium whitespace-nowrap">Change To</th>
+          <th className="px-5 py-3 font-medium text-right whitespace-nowrap">Action</th>
+        </tr>
+      </thead>
 
-                  return (
-                    <tr
-                      key={uid}
-                      className={`${i % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100/70 transition`}
+      <tbody className="divide-y divide-gray-100">
+        {loading ? (
+          <tr>
+            <td colSpan={6} className="px-5 py-8 text-center text-gray-500">Loading…</td>
+          </tr>
+        ) : users?.length ? (
+          users.map((u, i) => {
+            const uid = u.id ?? u._id ?? i;
+            const pending = edited[uid] ?? u.role;
+            const changed = pending !== u.role;
+            const index = (currentPage - 1) * pageSize + (i + 1);
+            const rowBusy = actionLoading && actionRowId === uid;
+
+            return (
+              <tr
+                key={uid}
+                className={`${i % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100/70 transition`}
+              >
+                <td className="px-5 py-4 font-medium text-gray-700 whitespace-nowrap">{index}</td>
+
+                <td className="px-5 py-4 whitespace-nowrap">
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-700">
+                      {(u.name || "")
+                        .split(" ")
+                        .map((s) => s?.[0])
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .join("")
+                        .toUpperCase()}
+                    </div>
+                    <div className="flex flex-col">
+                      {/* no truncate */}
+                      <span className="font-medium whitespace-nowrap">{u.name}</span>
+                    </div>
+                  </div>
+                </td>
+
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {/* no overflow hidden / no ellipsis */}
+                  <span title={u.email} className="block whitespace-nowrap">
+                    {u.email}
+                  </span>
+                </td>
+
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {roleBadge?.(u.role) ?? u.role}
+                </td>
+
+                <td className="px-5 py-4 whitespace-nowrap">
+                  <select
+                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-black/10"
+                    value={pending}
+                    onChange={(e) => onChangeRole?.(uid, e.target.value)}
+                    disabled={rowBusy}
+                  >
+                    <option value="user">user</option>
+                    <option value="admin">admin</option>
+                    <option value="employee">employee</option>
+                  </select>
+                </td>
+
+                <td className="px-5 py-4 whitespace-nowrap">
+                  <div className="flex justify-start md:justify-end gap-2">
+                    <button
+                      type="button"
+                      title={changed ? "Update role (will ask to confirm)" : "No changes to update"}
+                      onClick={() => changed && openConfirm(u, pending)}
+                      className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                        changed ? "bg-gray-900 text-white hover:opacity-90" : "bg-gray-400 text-white cursor-not-allowed"
+                      }`}
+                      disabled={!changed || rowBusy}
                     >
-                      <td className="px-5 py-4 font-medium text-gray-700 whitespace-nowrap">{index}</td>
+                      Update {changed ? <FiCheck className="h-4 w-4" /> : null}
+                    </button>
 
-                      <td className="px-5 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-3 max-w-[240px]">
-                          <div className="h-9 w-9 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-700">
-                            {(u.name || "")
-                              .split(" ")
-                              .map((s) => s?.[0])
-                              .filter(Boolean)
-                              .slice(0, 2)
-                              .join("")
-                              .toUpperCase()}
-                          </div>
-                          <div className="flex flex-col min-w-0">
-                            <span className="font-medium truncate">{u.name}</span>
-                          </div>
-                        </div>
-                      </td>
+                    <button
+                      type="button"
+                      title="Delete user"
+                      onClick={() => openDeleteConfirm(u)}
+                      className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition"
+                      disabled={rowBusy}
+                    >
+                      <FiTrash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })
+        ) : (
+          <tr>
+            <td colSpan={6} className="px-5 py-8 text-center text-gray-500">No users found.</td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
 
-                      <td className="px-5 py-4 whitespace-nowrap">
-                        <span className="block max-w-[260px] truncate" title={u.email}>{u.email}</span>
-                      </td>
 
-                      <td className="px-5 py-4 whitespace-nowrap">
-                        {roleBadge?.(u.role) ?? u.role}
-                      </td>
-
-                      <td className="px-5 py-4 whitespace-nowrap">
-                        <select
-                          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-black/10"
-                          value={pending}
-                          onChange={(e) => onChangeRole?.(uid, e.target.value)}
-                          disabled={rowBusy}
-                        >
-                          <option value="user">user</option>
-                          <option value="admin">admin</option>
-                        </select>
-                      </td>
-
-                      <td className="px-5 py-4 whitespace-nowrap">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            type="button"
-                            title={changed ? "Update role (will ask to confirm)" : "No changes to update"}
-                            onClick={() => changed && openConfirm(u, pending)}
-                            className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
-                              changed ? "bg-gray-900 text-white hover:opacity-90" : "bg-gray-400 text-white cursor-not-allowed"
-                            }`}
-                            disabled={!changed || rowBusy}
-                          >
-                            Update {changed ? <FiCheck className="h-4 w-4" /> : null}
-                          </button>
-
-                          <button
-                            type="button"
-                            title="Delete user"
-                            onClick={() => openDeleteConfirm(u)}
-                            className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition"
-                            disabled={rowBusy}
-                          >
-                            <FiTrash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-gray-500">No users found.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
       {/* Role Update Confirm Modal */}
       {confirmOpen && confirmTarget ? (
@@ -265,7 +282,7 @@ export default function UserTable({
               <span className="font-medium">{confirmTarget.newRole}</span>?
             </p>
 
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="mt-6 flex justify- gap-3">
               <button
                 type="button"
                 className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"
@@ -305,7 +322,7 @@ export default function UserTable({
               <span className="text-red-600 font-medium">This action cannot be undone.</span>
             </p>
 
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="mt-6 flex justify-center gap-3">
               <button
                 type="button"
                 className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50"

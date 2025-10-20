@@ -29,6 +29,11 @@ export const navItems = [
     icon: LuFileText,
   },
     {
+    name: "Blogs",
+    href: "/dashboard/blog",
+    icon: LuFileText,
+  },
+    {
     name: "Add user",
     href: "/dashboard/adduser",
     icon: FiUsers,

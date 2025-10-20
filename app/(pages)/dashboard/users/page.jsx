@@ -58,16 +58,21 @@ export default function UsersPage() {
   useEffect(() => {
     fetchData(currentPage, debouncedSearch);
   }, [currentPage, debouncedSearch, fetchData]);
-
-  const roleBadge = (role) => (
-    <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-        role === "admin" ? "bg-green-600 text-white" : "bg-gray-400 text-white"
-      }`}
-    >
-      {role}
-    </span>
-  );
+const roleBadge = (role = "user") => (
+  <span
+    className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+      role === "admin"
+        ? "bg-emerald-600 text-white"
+        : role === "employee"
+        ? "bg-blue-400 text-white"
+        : role === "user"
+        ? "bg-gray-500 text-white"
+        : "bg-zinc-600 text-white" // <-- final else (unknown role)
+    }`}
+  >
+    {role ? role.charAt(0).toUpperCase() + role.slice(1) : "User"}
+  </span>
+);
 
   const handlePageChange = (page) => setCurrentPage(page);
   const handleChangeRole = (userId, nextRole) =>
@@ -87,7 +92,7 @@ export default function UsersPage() {
   const pageSize = data?.pageSize ?? data?.perPage ?? 15;
 
   return (
-    <div className="space-y-6">
+    <div className="">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

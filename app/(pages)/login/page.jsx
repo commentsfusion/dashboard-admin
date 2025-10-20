@@ -20,11 +20,14 @@ const handleLogin = async (e) => {
     const res = await authAPI.LOGIN({ email, password });
     if (!res?.success) throw new Error(res?.message || "Login failed");
 
-    if (res.user?.role === "admin") {
+    // normalize role
+    const role = (res?.user?.role || "").toLowerCase();
+
+    if (["admin", "employee"].includes(role)) {
       toast.success(res.message || "Logged in successfully.");
-      router.replace("/dashboard");
+      router.replace("/dashboard"); // ✅ both admin & employee
     } else {
-      toast.error("Access denied. Not an admin!");
+      toast.error("Access denied. Only admin or employee can proceed.");
     }
   } catch (err) {
     toast.error(err?.message || "Login failed");
@@ -32,6 +35,7 @@ const handleLogin = async (e) => {
     setLoading(false);
   }
 };
+
 
 
   return (
